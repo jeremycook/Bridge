@@ -56,8 +56,10 @@
     <Compile Include="EFBridge.cs" />
     <Compile Include="Internals\BridgeDbContext.cs" />
     <Compile Include="Internals\EFQuery.cs" />
+    <Compile Include="Internals\InterfaceIndex.cs" />
     <Compile Include="Internals\Index.cs" />
     <Compile Include="Internals\Record.cs" />
+    <Compile Include="Internals\SqlWhere.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

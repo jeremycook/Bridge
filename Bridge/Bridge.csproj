@@ -44,9 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Field.cs" />
     <Compile Include="IBridge.cs" />
+    <Compile Include="Literal.cs" />
+    <Compile Include="StandardFilter.cs" />
     <Compile Include="IIdentify.cs" />
-    <Compile Include="IIndex.cs" />
     <Compile Include="IQuery.cs" />
     <Compile Include="IndexSort.cs" />
     <Compile Include="Serializer.cs" />

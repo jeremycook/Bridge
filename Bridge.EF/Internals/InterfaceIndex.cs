@@ -5,13 +5,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Bridge.EF.Internals
 {
     /// <summary>
-    /// A value that identifies and is used to locate a particular element within a <see cref="Domain.Record"/>.
+    /// A value that identifies an inteface that a <see cref="Domain.Record"/> model implements.
     /// </summary>
-    internal class Index
+    internal class InterfaceIndex
     {
         [Obsolete("Runtime only", true)]
-        public Index() { }
-        public Index(Guid recordId, string name, string value)
+        public InterfaceIndex() { }
+        public InterfaceIndex(Guid recordId, string name, string value)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -21,7 +21,6 @@ namespace Bridge.EF.Internals
 
             RecordId = recordId;
             Name = name;
-            Value = value;
         }
 
         [Key, Column(Order = 1)]
@@ -32,9 +31,5 @@ namespace Bridge.EF.Internals
         [Key, Column(Order = 2)]
         [Required, StringLength(100)]
         public string Name { get; protected set; }
-
-        [Key, Column(Order = 3)]
-        [Required(AllowEmptyStrings = true)]
-        public string Value { get; protected set; }
     }
 }

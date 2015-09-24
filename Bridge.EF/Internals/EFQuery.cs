@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Data.Entity;
-using LinqKit;
+using System.Text;
+using System.Data.SqlClient;
 
 namespace Bridge.EF.Internals
 {
     internal class EFQuery<TModel> : IQuery<TModel>
     {
         private BridgeDbContext Db;
-        private Expression<Func<IIndex, bool>> filter;
+        private StandardFilter filter;
         private IndexSort[] sort;
         private int pageSize = 0;
         private int currentPage = 1;
@@ -20,7 +19,7 @@ namespace Bridge.EF.Internals
             this.Db = db;
         }
 
-        public IQuery<TModel> Filter(Expression<Func<IIndex, bool>> filter)
+        public IQuery<TModel> Filter(StandardFilter filter)
         {
             this.filter = filter;
             return this;
@@ -41,7 +40,7 @@ namespace Bridge.EF.Internals
 
         public IList<TModel> ToList()
         {
-            IQueryable<Record> records = GetRecords();
+            IEnumerable<Record> records = GetRecords();
 
             var models = records.ToList()
                 .Select(o => (TModel)o.GetModel())
@@ -49,30 +48,89 @@ namespace Bridge.EF.Internals
             return models;
         }
 
-        private IQueryable<Record> GetRecords()
+        private IEnumerable<Record> GetRecords()
         {
-            IQueryable<Record> records = Db.Records.AsNoTracking()
-                .AsExpandable()
-                .Where(o => o.TypeName == typeof(TModel).FullName)
-                .OrderBy(o => o.Name);
+            var parameters = new List<object>();
+            StringBuilder query = new StringBuilder();
 
-            if (filter != null)
-            {
-                records = records.Where(o => o.Indices.Any(i => filter.Invoke(i)));
-            }
+            // SELECT, FROM and JOINs
+
+            query.AppendLine(
+@"SELECT Records.Id, Records.TypeName, Records.Storage, Records.Name
+FROM  Records
+LEFT JOIN Indices ON Indices.RecordId = Records.Id"
+            );
 
             if (sort != null)
             {
+                int i = 0;
                 foreach (var item in sort)
                 {
-                    records = ApplySort(records as IOrderedQueryable<Record>, item);
+                    query.AppendLine();
+                    query.AppendFormat("LEFT JOIN (select * from Indices i where i.Name = '{0}') Sort{1} ON Sort{1}.RecordId = Records.Id",
+                        item.IndexName, i);
+                    i++;
                 }
             }
 
+            // WHERE
+
+            query.AppendLine();
+            query.Append("WHERE 1=1");
+
+            if (typeof(TModel).IsInterface)
+            {
+                query.AppendLine();
+                query.AppendFormat(@"AND Interfaces.FullName = '{0}'", typeof(TModel).FullName);
+            }
+            else
+            {
+                query.AppendLine();
+                query.AppendFormat(@"AND Records.TypeName = '{0}'", typeof(TModel).FullName);
+            }
+
+            if (filter != null)
+            {
+                var sqlWhere = new SqlWhere(filter);
+
+                query.AppendLine();
+                query.Append("AND (" + sqlWhere.Clause + ")");
+                parameters.AddRange(sqlWhere.Parameters.Select((o, i) => new SqlParameter("@p" + i, o.Value)));
+            }
+
+            // GROUP BY
+
+            query.AppendLine();
+            query.Append("GROUP BY Records.Id, Records.TypeName, Records.Storage, Records.Name");
+
+            // ORDER BY
+
+            if (sort != null)
+            {
+                query.AppendLine();
+                query.Append("ORDER BY ");
+                query.Append(string.Join(", ", sort.Select((o, i) => (o.Ascending ? "max" : "min") + "(Sort" + i + ".Value)" + (o.Ascending ? " asc" : " desc"))));
+            }
+            else
+            {
+                query.AppendLine();
+                query.Append("ORDER BY Records.Name");
+            }
+
+            // PAGING
+
             if (pageSize > 0)
             {
-                records = records.Skip((currentPage - 1) * pageSize).Take(pageSize);
+                query.AppendLine();
+                query.Append(
+@"OFFSET (@currentPage - 1) ROWS
+FETCH NEXT @pageSize ROWS ONLY"
+                );
+                parameters.Add(new SqlParameter("currentPage", currentPage));
+                parameters.Add(new SqlParameter("pageSize", pageSize));
             }
+
+            var records = Db.Database.SqlQuery<Record>(query.ToString(), parameters.ToArray());
 
             return records;
         }

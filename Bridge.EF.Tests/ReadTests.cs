@@ -1,7 +1,5 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Bridge.Tests.Models;
-using Foundation.ObjectHydrator;
 using System.Linq;
 
 namespace Bridge.EF.Tests
@@ -47,7 +45,10 @@ namespace Bridge.EF.Tests
 
             string contentFullName = typeof(IContent).FullName;
             var receivedPosts = range
-                .Filter(o => o.Name == "Interface" && o.Value == contentFullName)
+                .Filter(new And(
+                    leftFilter: new Eq(new Field(nameof(Post.Title)), new Literal(posts.First().Title)),
+                    rightFilter: new Eq(new Field(nameof(Post.Title)), new Literal(posts.First().Title))
+                ))
                 .ToList();
 
             Assert.IsNotNull(receivedPosts);
@@ -64,7 +65,7 @@ namespace Bridge.EF.Tests
             Bridge.InsertRange(posts);
 
             var receivedPosts = range
-                .Sort(new IndexSort("Interface"))
+                .Sort(new IndexSort("Name"))
                 .ToList();
 
             Assert.IsNotNull(receivedPosts);
