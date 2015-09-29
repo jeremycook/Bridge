@@ -7,11 +7,11 @@ namespace Bridge.EF.Internals
     /// <summary>
     /// A value that identifies and is used to locate a particular element within a <see cref="Domain.Record"/>.
     /// </summary>
-    internal class Index
+    internal class FieldIndex
     {
         [Obsolete("Runtime only", true)]
-        public Index() { }
-        public Index(Guid recordId, string name, string value)
+        public FieldIndex() { }
+        public FieldIndex(Guid recordId, string name, string value)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -21,7 +21,7 @@ namespace Bridge.EF.Internals
 
             RecordId = recordId;
             Name = name;
-            Value = value;
+            Text = value;
         }
 
         [Key, Column(Order = 1)]
@@ -34,7 +34,15 @@ namespace Bridge.EF.Internals
         public string Name { get; protected set; }
 
         [Key, Column(Order = 3)]
-        [Required(AllowEmptyStrings = true)]
-        public string Value { get; protected set; }
+        public string Text { get; protected set; }
+
+        [Key, Column(Order = 4)]
+        public DateTimeOffset? Moment { get; protected set; }
+
+        [Key, Column(Order = 5)]
+        public decimal? Number { get; protected set; }
+
+        [Key, Column(Order = 6)]
+        public float? Float { get; protected set; }
     }
 }

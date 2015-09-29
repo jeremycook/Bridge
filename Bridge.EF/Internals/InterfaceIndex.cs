@@ -11,15 +11,11 @@ namespace Bridge.EF.Internals
     {
         [Obsolete("Runtime only", true)]
         public InterfaceIndex() { }
-        public InterfaceIndex(Guid recordId, string name, string value)
+        public InterfaceIndex(string name)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
-            RecordId = recordId;
             Name = name;
         }
 

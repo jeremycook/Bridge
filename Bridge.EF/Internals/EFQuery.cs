@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.SqlClient;
+using System.Data.Entity.Infrastructure;
 
 namespace Bridge.EF.Internals
 {
@@ -38,6 +39,12 @@ namespace Bridge.EF.Internals
             return this;
         }
 
+        public int Count()
+        {
+            IEnumerable<Record> records = GetRecords();
+            return records.Count();
+        }
+
         public IList<TModel> ToList()
         {
             IEnumerable<Record> records = GetRecords();
@@ -48,7 +55,7 @@ namespace Bridge.EF.Internals
             return models;
         }
 
-        private IEnumerable<Record> GetRecords()
+        private DbRawSqlQuery<Record> GetRecords()
         {
             var parameters = new List<object>();
             StringBuilder query = new StringBuilder();
@@ -58,7 +65,8 @@ namespace Bridge.EF.Internals
             query.AppendLine(
 @"SELECT Records.Id, Records.TypeName, Records.Storage, Records.Name
 FROM  Records
-LEFT JOIN Indices ON Indices.RecordId = Records.Id"
+LEFT JOIN InterfaceIndexes ON InterfaceIndexes.RecordId = Records.Id
+LEFT JOIN FieldIndexes ON FieldIndexes.RecordId = Records.Id"
             );
 
             if (sort != null)
@@ -67,7 +75,7 @@ LEFT JOIN Indices ON Indices.RecordId = Records.Id"
                 foreach (var item in sort)
                 {
                     query.AppendLine();
-                    query.AppendFormat("LEFT JOIN (select * from Indices i where i.Name = '{0}') Sort{1} ON Sort{1}.RecordId = Records.Id",
+                    query.AppendFormat("LEFT JOIN (select * from FieldIndexes i where i.Name = '{0}') Sort{1} ON Sort{1}.RecordId = Records.Id",
                         item.IndexName, i);
                     i++;
                 }
@@ -81,7 +89,7 @@ LEFT JOIN Indices ON Indices.RecordId = Records.Id"
             if (typeof(TModel).IsInterface)
             {
                 query.AppendLine();
-                query.AppendFormat(@"AND Interfaces.FullName = '{0}'", typeof(TModel).FullName);
+                query.AppendFormat(@"AND InterfaceIndexes.Name = '{0}'", typeof(TModel).FullName);
             }
             else
             {
@@ -109,7 +117,12 @@ LEFT JOIN Indices ON Indices.RecordId = Records.Id"
             {
                 query.AppendLine();
                 query.Append("ORDER BY ");
-                query.Append(string.Join(", ", sort.Select((o, i) => (o.Ascending ? "max" : "min") + "(Sort" + i + ".Value)" + (o.Ascending ? " asc" : " desc"))));
+                query.Append(string.Join(", ", sort.Select((o, i) => 
+                    (o.Ascending ? "max" : "min") + "(Sort" + i + ".Text)" + (o.Ascending ? " asc" : " desc") + ", " +
+                    (o.Ascending ? "max" : "min") + "(Sort" + i + ".Moment)" + (o.Ascending ? " asc" : " desc") + ", " +
+                    (o.Ascending ? "max" : "min") + "(Sort" + i + ".Number)" + (o.Ascending ? " asc" : " desc") + ", " +
+                    (o.Ascending ? "max" : "min") + "(Sort" + i + ".Float)" + (o.Ascending ? " asc" : " desc")
+                )));
             }
             else
             {
@@ -132,31 +145,6 @@ FETCH NEXT @pageSize ROWS ONLY"
 
             var records = Db.Database.SqlQuery<Record>(query.ToString(), parameters.ToArray());
 
-            return records;
-        }
-
-        private static IQueryable<Record> ApplySort(IOrderedQueryable<Record> records, IndexSort sortOn)
-        {
-            if (sortOn.Ascending)
-            {
-                records = records.ThenBy(o =>
-                    o.Indices
-                        .Where(i => i.Name.Equals(sortOn.IndexName, StringComparison.InvariantCultureIgnoreCase))
-                        .OrderBy(i => i.Value)
-                        .Select(i => i.Value)
-                        .FirstOrDefault()
-                );
-            }
-            else
-            {
-                records = records.ThenByDescending(o =>
-                    o.Indices
-                        .Where(i => i.Name.Equals(sortOn.IndexName, StringComparison.InvariantCultureIgnoreCase))
-                        .OrderByDescending(i => i.Value)
-                        .Select(i => i.Value)
-                        .FirstOrDefault()
-                );
-            }
             return records;
         }
     }

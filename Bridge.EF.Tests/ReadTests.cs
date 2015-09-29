@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Bridge.Tests.Models;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Bridge.EF.Tests
 {
@@ -23,7 +24,7 @@ namespace Bridge.EF.Tests
         public void GetPosts()
         {
             var range = Bridge.Query<Post>();
-            int startCount = range.ToList().Count;
+            int startCount = range.Count();
 
             var posts = PostHydrador.GetList(1000);
             Bridge.InsertRange(posts);
@@ -32,6 +33,23 @@ namespace Bridge.EF.Tests
 
             Assert.IsNotNull(receivedPosts);
             Assert.AreEqual(posts.Count, receivedPosts.Count - startCount);
+        }
+
+        [TestMethod]
+        public void GetTitledModels()
+        {
+            var range = Bridge.Query<ITitled>();
+            int startCount = range.Count();
+
+            var titledModels = PostHydrador.GetList(800).Cast<ITitled>()
+                .Union(LinkHydrador.GetList(200))
+                .ToList();
+            Bridge.InsertRange(titledModels);
+
+            var receivedPosts = range.ToList();
+
+            Assert.IsNotNull(receivedPosts);
+            Assert.AreEqual(titledModels.Count, receivedPosts.Count - startCount);
         }
 
         [TestMethod]
@@ -47,12 +65,12 @@ namespace Bridge.EF.Tests
             var receivedPosts = range
                 .Filter(new And(
                     leftFilter: new Eq(new Field(nameof(Post.Title)), new Literal(posts.First().Title)),
-                    rightFilter: new Eq(new Field(nameof(Post.Title)), new Literal(posts.First().Title))
+                    rightFilter: new Eq(new Field(nameof(Post.Authored)), new Literal(posts.First().Authored))
                 ))
                 .ToList();
 
             Assert.IsNotNull(receivedPosts);
-            Assert.AreEqual(0, receivedPosts.Count);
+            Assert.AreEqual(1, receivedPosts.Count);
         }
 
         [TestMethod]

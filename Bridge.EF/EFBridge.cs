@@ -1,5 +1,6 @@
 ﻿using Bridge.EF.Internals;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -49,7 +50,7 @@ namespace Bridge.EF
             Db.SaveChanges();
         }
 
-        public void InsertRange<TModel>(IEnumerable<TModel> list)
+        public void InsertRange(IEnumerable<object> list)
         {
             Db.Records.AddRange(list.Select(o => new Record(o)));
             Db.SaveChanges();

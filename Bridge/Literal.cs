@@ -6,36 +6,43 @@ namespace Bridge
     {
         public Literal(DateTimeOffset moment)
         {
-            this.ValueType = typeof(DateTimeOffset);
+            this.ValueType = LiteralType.Moment;
             this.Value = moment;
         }
 
         public Literal(string text)
         {
-            this.ValueType = typeof(string);
+            this.ValueType = LiteralType.Text;
             this.Value = text;
         }
 
         public Literal(int integer)
         {
-            this.ValueType = typeof(int);
+            this.ValueType = LiteralType.Number;
             this.Value = integer;
         }
 
         public Literal(decimal @decimal)
         {
-            this.ValueType = typeof(decimal);
+            this.ValueType = LiteralType.Number;
             this.Value = @decimal;
         }
 
         public Literal(float @float)
         {
-            this.ValueType = typeof(float);
+            this.ValueType = LiteralType.Float;
             this.Value = @float;
         }
 
-        public Type ValueType { get; protected set; }
+        public LiteralType ValueType { get; protected set; }
         public object Value { get; protected set; }
     }
 
+    public enum LiteralType
+    {
+        Text = 1,
+        Moment = 2,
+        Number = 3,
+        Float = 4
+    }
 }

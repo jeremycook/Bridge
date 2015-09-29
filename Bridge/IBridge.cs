@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bridge
 {
@@ -25,7 +22,7 @@ namespace Bridge
         IQuery<TModel> Query<TModel>();
 
         void Insert<TModel>(TModel model);
-        void InsertRange<TModel>(IEnumerable<TModel> list);
+        void InsertRange(IEnumerable<object> list);
 
         void Update<TModel>(Guid id, TModel model);
 

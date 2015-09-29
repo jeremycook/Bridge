@@ -16,10 +16,19 @@ namespace Bridge.EF.Internals
             if (model == null)
                 throw new ArgumentNullException("model");
 
+            InterfaceIndices = new List<InterfaceIndex>();
+            FieldIndices = new List<FieldIndex>();
+
             Id = (model is IIdentify) ? (model as IIdentify).Id : Guid.NewGuid();
-            Indices = new List<Index>();
             TypeName = model.GetType().FullName;
             SetModel(model);
+
+            foreach (var item in model.GetType().GetInterfaces())
+            {
+                InterfaceIndices.Add(new InterfaceIndex(item.FullName));
+            }
+
+            // TODO: Add field indexes.
         }
 
         private object _Model;
@@ -47,7 +56,8 @@ namespace Bridge.EF.Internals
         [Required, MaxLength(16000)]
         public byte[] Storage { get; protected set; }
 
-        public virtual ICollection<Index> Indices { get; protected set; }
+        public virtual ICollection<InterfaceIndex> InterfaceIndices { get; protected set; }
+        public virtual ICollection<FieldIndex> FieldIndices { get; protected set; }
 
 
         /// <summary>
@@ -88,19 +98,19 @@ namespace Bridge.EF.Internals
             //// TODO: Abstract this out into a pluggable system.
             //if (_Model.GetType().IsClass)
             //{
-            //    var storedInterfaces = Indices.Where(o => o.Name == "Interface").ToList();
+            //    var storedInterfaces = FieldIndexes.Where(o => o.Name == "Interface").ToList();
             //    var modelInterfaceNames = _Model.GetType().GetInterfaces().Select(o => o.FullName).ToList();
 
             //    var obsoleteInterfaces = storedInterfaces.Where(o => !modelInterfaceNames.Contains(o.Value)).ToList();
             //    foreach (var item in obsoleteInterfaces)
             //    {
-            //        Indices.Remove(item);
+            //        FieldIndexes.Remove(item);
             //    }
 
             //    var newInterfaceNames = modelInterfaceNames.Where(o => !storedInterfaces.Any(i => i.Value == o)).ToList();
             //    foreach (var fullName in newInterfaceNames)
             //    {
-            //        Indices.Add(new Index(Id, "Interface", fullName));
+            //        FieldIndexes.Add(new Index(Id, "Interface", fullName));
             //    }
             //}
         }
