@@ -43,7 +43,7 @@ namespace Bridge.EF
             return new EFQuery<TModel>(Db);
         }
 
-        public void Insert<TModel>(TModel model)
+        public void Insert(object model)
         {
             Record record = new Record(model);
             Db.Records.Add(record);

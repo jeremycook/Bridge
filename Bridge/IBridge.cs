@@ -21,8 +21,8 @@ namespace Bridge
         /// <returns></returns>
         IQuery<TModel> Query<TModel>();
 
-        void Insert<TModel>(TModel model);
-        void InsertRange(IEnumerable<object> list);
+        void Insert(object model);
+        void InsertRange(IEnumerable<object> models);
 
         void Update<TModel>(Guid id, TModel model);
 
