@@ -20,6 +20,7 @@ namespace Bridge.EF.Internals
             : base(nameOrConnectionString: nameOrConnectionString)
         { }
 
+        public DbSet<Class> Classes { get; set; }
         public DbSet<Record> Records { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

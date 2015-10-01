@@ -24,9 +24,9 @@ namespace Bridge
         void Insert(object model);
         void InsertRange(IEnumerable<object> models);
 
-        void Update<TModel>(Guid id, TModel model);
+        void Update(Guid id, object model);
 
-        void Delete<TModel>(Guid id);
-        void DeleteRange<TModel>(IEnumerable<Guid> recordIds);
+        void Delete(Guid id);
+        void DeleteRange(IEnumerable<Guid> recordIds);
     }
 }

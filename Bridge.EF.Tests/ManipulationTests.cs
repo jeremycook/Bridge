@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Bridge.Tests.Models;
-using Foundation.ObjectHydrator;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
 namespace Bridge.EF.Tests
@@ -42,7 +39,7 @@ namespace Bridge.EF.Tests
             var post = PostHydrador.GetSingle();
             Bridge.Insert(post);
 
-            Bridge.Delete<Post>(post.Id);
+            Bridge.Delete(post.Id);
         }
 
         [TestMethod]
@@ -51,7 +48,7 @@ namespace Bridge.EF.Tests
             var posts = PostHydrador.GetList(1000);
             Bridge.InsertRange(posts);
 
-            Bridge.DeleteRange<Post>(posts.Select(o => o.Id));
+            Bridge.DeleteRange(posts.Select(o => o.Id));
         }
     }
 }

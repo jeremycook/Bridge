@@ -65,7 +65,7 @@ namespace Bridge.EF.Tests
             var receivedPosts = range
                 .Filter(new And(
                     leftFilter: new Eq(new Field(nameof(Post.Title)), new Literal(posts.First().Title)),
-                    rightFilter: new Eq(new Field(nameof(Post.Authored)), new Literal(posts.First().Authored))
+                    rightFilter: new Eq(new Field(nameof(Post.Author)), new Literal(posts.First().Author))
                 ))
                 .ToList();
 

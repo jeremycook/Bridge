@@ -63,10 +63,10 @@ namespace Bridge.EF.Internals
             // SELECT, FROM and JOINs
 
             query.AppendLine(
-@"SELECT Records.Id, Records.TypeName, Records.Storage, Records.Name
+@"SELECT Records.Id, Records.ClassName, Records.Storage, Records.Name
 FROM  Records
-LEFT JOIN InterfaceIndexes ON InterfaceIndexes.RecordId = Records.Id
-LEFT JOIN FieldIndexes ON FieldIndexes.RecordId = Records.Id"
+LEFT JOIN Classes ON Classes.Name = Records.ClassName
+LEFT JOIN Interfaces ON Interfaces.ClassName = Classes.Name"
             );
 
             if (sort != null)
@@ -89,12 +89,12 @@ LEFT JOIN FieldIndexes ON FieldIndexes.RecordId = Records.Id"
             if (typeof(TModel).IsInterface)
             {
                 query.AppendLine();
-                query.AppendFormat(@"AND InterfaceIndexes.Name = '{0}'", typeof(TModel).FullName);
+                query.AppendFormat(@"AND Interfaces.Name = '{0}'", typeof(TModel).FullName);
             }
             else
             {
                 query.AppendLine();
-                query.AppendFormat(@"AND Records.TypeName = '{0}'", typeof(TModel).FullName);
+                query.AppendFormat(@"AND Records.ClassName = '{0}'", typeof(TModel).FullName);
             }
 
             if (filter != null)
@@ -109,7 +109,7 @@ LEFT JOIN FieldIndexes ON FieldIndexes.RecordId = Records.Id"
             // GROUP BY
 
             query.AppendLine();
-            query.Append("GROUP BY Records.Id, Records.TypeName, Records.Storage, Records.Name");
+            query.Append("GROUP BY Records.Id, Records.ClassName, Records.Storage, Records.Name");
 
             // ORDER BY
 

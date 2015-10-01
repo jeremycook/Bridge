@@ -4,6 +4,12 @@ namespace Bridge
 {
     public class Literal
     {
+        public Literal(Guid guid)
+        {
+            this.ValueType = LiteralType.Guid;
+            this.Value = guid;
+        }
+
         public Literal(DateTimeOffset moment)
         {
             this.ValueType = LiteralType.Moment;
@@ -40,9 +46,10 @@ namespace Bridge
 
     public enum LiteralType
     {
-        Text = 1,
-        Moment = 2,
-        Number = 3,
-        Float = 4
+        Guid = 1,
+        Text = 2,
+        Moment = 3,
+        Number = 4,
+        Float = 5,
     }
 }

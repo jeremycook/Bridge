@@ -16,29 +16,24 @@ namespace Bridge.EF.Internals
             if (model == null)
                 throw new ArgumentNullException("model");
 
-            InterfaceIndices = new List<InterfaceIndex>();
             FieldIndices = new List<FieldIndex>();
 
             Id = (model is IIdentify) ? (model as IIdentify).Id : Guid.NewGuid();
-            TypeName = model.GetType().FullName;
+            ClassName = model.GetType().FullName;
             SetModel(model);
-
-            foreach (var item in model.GetType().GetInterfaces())
-            {
-                InterfaceIndices.Add(new InterfaceIndex(item.FullName));
-            }
-
-            // TODO: Add field indexes.
         }
 
         private object _Model;
         private string _Name;
+        private Type _ModelType;
+        private object item;
 
         public Guid Id { get; protected set; }
 
-        [Index("IX_dbo_Records_TypeName")]
+        // TODO? [Index("IX_dbo_Records_ClassName")]
         [Required, StringLength(250)]
-        public string TypeName { get; protected set; }
+        public string ClassName { get; protected set; }
+        public virtual Class Class { get; private set; }
 
         [Index("IX_dbo_Records_Name")]
         [Required, StringLength(250)]
@@ -56,7 +51,6 @@ namespace Bridge.EF.Internals
         [Required, MaxLength(16000)]
         public byte[] Storage { get; protected set; }
 
-        public virtual ICollection<InterfaceIndex> InterfaceIndices { get; protected set; }
         public virtual ICollection<FieldIndex> FieldIndices { get; protected set; }
 
 
@@ -84,49 +78,71 @@ namespace Bridge.EF.Internals
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
-            if (model.GetType().FullName != this.TypeName)
+            if (model.GetType().FullName != this.ClassName)
                 throw new InvalidOperationException(string.Format(
                     "The full type name of `model` ({0}) must match this record's `TypeName` ({1}).",
-                    model.GetType().FullName, this.TypeName));
+                    model.GetType().FullName, this.ClassName));
 
             _Model = model;
             Name = _Model.ToString();
             string json = Serializer.Current.Serialize(_Model);
             Storage = System.Text.Encoding.UTF8.GetBytes(json);
 
-            //// Index interfaces.
-            //// TODO: Abstract this out into a pluggable system.
-            //if (_Model.GetType().IsClass)
-            //{
-            //    var storedInterfaces = FieldIndexes.Where(o => o.Name == "Interface").ToList();
-            //    var modelInterfaceNames = _Model.GetType().GetInterfaces().Select(o => o.FullName).ToList();
+            // Update field indexes.
+            var storedIndexes = FieldIndices.ToList();
+            var props = GetModelType().GetProperties().ToList();
 
-            //    var obsoleteInterfaces = storedInterfaces.Where(o => !modelInterfaceNames.Contains(o.Value)).ToList();
-            //    foreach (var item in obsoleteInterfaces)
-            //    {
-            //        FieldIndexes.Remove(item);
-            //    }
+            var removedIndexes = storedIndexes
+                .Where(o => !props.Any(p => p.Name.Equals(o.Name, StringComparison.InvariantCultureIgnoreCase)))
+                .ToList();
+            foreach (var item in removedIndexes)
+            {
+                FieldIndices.Remove(item);
+            }
 
-            //    var newInterfaceNames = modelInterfaceNames.Where(o => !storedInterfaces.Any(i => i.Value == o)).ToList();
-            //    foreach (var fullName in newInterfaceNames)
-            //    {
-            //        FieldIndexes.Add(new Index(Id, "Interface", fullName));
-            //    }
-            //}
+            var existingProps = props
+                .Select(o => new
+                {
+                    Property = o,
+                    Index = storedIndexes.SingleOrDefault(i => i.Name.Equals(o.Name, StringComparison.InvariantCultureIgnoreCase))
+                })
+                .Where(o => o.Index != null)
+                .ToList();
+            foreach (var item in existingProps)
+            {
+                item.Index.UpdateValue(item.Property.GetValue(model));
+            }
+
+            var missingProps = props
+                .Where(o => !storedIndexes.Any(i => i.Name.Equals(o.Name, StringComparison.InvariantCultureIgnoreCase)))
+                .ToList();
+            foreach (var prop in missingProps)
+            {
+                FieldIndices.Add(new FieldIndex(Id, prop.Name, prop.GetValue(model)));
+            }
         }
 
         private Type GetModelType()
         {
-            foreach (var assembly in EFBridge.ModelAssemblies)
+            if (_ModelType == null)
             {
-                Type type = assembly.GetType(TypeName);
-                if (type != null)
+                foreach (var assembly in EFBridge.ModelAssemblies)
                 {
-                    return type;
+                    Type type = assembly.GetType(ClassName);
+                    if (type != null)
+                    {
+                        _ModelType = type;
+                        break;
+                    }
+                }
+
+                if (_ModelType == null)
+                {
+                    throw new TypeLoadException(string.Format("Could not load type '{0}' from any currently loaded assemblies.", ClassName));
                 }
             }
 
-            throw new TypeLoadException(string.Format("Could not load type '{0}' from any currently loaded assemblies.", TypeName));
+            return _ModelType;
         }
     }
 }

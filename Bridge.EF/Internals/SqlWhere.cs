@@ -39,7 +39,7 @@ namespace Bridge.EF.Internals
                 if (filter is Eq)
                 {
                     args.Add(string.Format(
-                        "FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] {2}",
+                        "exists (select * from FieldIndexes where FieldIndexes.RecordId = Records.Id and FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] {2})",
                         (filter as Eq).Field.Name,
                         (filter as Eq).Literal.ValueType,
                         (filter as Eq).Literal.Value == null ? "is null" : "= @p" + Parameters.Count
@@ -51,7 +51,7 @@ namespace Bridge.EF.Internals
                 if (filter is Lt)
                 {
                     args.Add(string.Format(
-                        "FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] < {2}",
+                        "exists (select * from FieldIndexes where FieldIndexes.RecordId = Records.Id and FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] < {2})",
                         (filter as Lt).Field.Name,
                         (filter as Lt).Literal.ValueType,
                         "@p" + Parameters.Count
@@ -63,7 +63,7 @@ namespace Bridge.EF.Internals
                 if (filter is Lte)
                 {
                     args.Add(string.Format(
-                        "FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] <= {2}",
+                        "exists (select * from FieldIndexes where FieldIndexes.RecordId = Records.Id and FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] <= {2})",
                         (filter as Lte).Field.Name,
                         (filter as Lte).Literal.ValueType,
                         "@p" + Parameters.Count
@@ -75,7 +75,7 @@ namespace Bridge.EF.Internals
                 if (filter is Gt)
                 {
                     args.Add(string.Format(
-                        "FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] > {2}",
+                        "exists (select * from FieldIndexes where FieldIndexes.RecordId = Records.Id and FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] > {2})",
                         (filter as Gt).Field.Name,
                         (filter as Gt).Literal.ValueType,
                         "@p" + Parameters.Count
@@ -87,7 +87,7 @@ namespace Bridge.EF.Internals
                 if (filter is Gte)
                 {
                     args.Add(string.Format(
-                        "FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] >= {2}",
+                        "exists (select * from FieldIndexes where FieldIndexes.RecordId = Records.Id and FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] >= {2})",
                         (filter as Gte).Field.Name,
                         (filter as Gte).Literal.ValueType,
                         "@p" + Parameters.Count
@@ -100,7 +100,7 @@ namespace Bridge.EF.Internals
                 {
                     var inf = filter as In;
                     args.Add(string.Format(
-                        "FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] in ({2})",
+                        "exists (select * from FieldIndexes where FieldIndexes.RecordId = Records.Id and FieldIndexes.[Name] = '{0}' and FieldIndexes.[{1}] in ({2}))",
                         inf.Field.Name,
                         inf.Literals[0].ValueType,
                         string.Join(", ", Enumerable.Range(0, inf.Literals.Count()).Select(o => "@p" + (Parameters.Count + o)))
