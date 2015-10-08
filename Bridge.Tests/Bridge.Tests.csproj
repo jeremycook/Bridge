@@ -35,8 +35,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Foundation.ObjectHydrator, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\objecthydrator.1.1.0\lib\.NetFramework 4.0\Foundation.ObjectHydrator.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -51,6 +56,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Db\ManipulationTests.cs" />
+    <Compile Include="Db\ReadTests.cs" />
+    <Compile Include="Db\TestsBase.cs" />
     <Compile Include="Models\IAuthored.cs" />
     <Compile Include="Models\IChange.cs" />
     <Compile Include="Models\IContent.cs" />
@@ -61,10 +69,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Bridge.Db\Bridge.Db.csproj">
+      <Project>{950a4f09-a569-431b-9b48-5310f8ca085e}</Project>
+      <Name>Bridge.Db</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Bridge\Bridge.csproj">
       <Project>{9ba79a40-9b8f-4822-9d1d-f9483a2e1436}</Project>
       <Name>Bridge</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bridge.Tests.Models
 {
-    public class Link : ITitled, ISummarize
+    public class Link : IIdentify, ITitled, ISummarize
     {
         [Obsolete("Runtime only", true)]
         public Link() { }
@@ -16,6 +16,8 @@ namespace Bridge.Tests.Models
             this.Summary = summary;
             this.Url = url;
         }
+
+        public Guid Id { get; set; }
 
         public string Title { get; protected set; }
         public string Summary { get; protected set; }

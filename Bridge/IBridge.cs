@@ -11,7 +11,7 @@ namespace Bridge
         /// <typeparam name="TModel"></typeparam>
         /// <param name="id"></param>
         /// <returns></returns>
-        TModel Get<TModel>(Guid id);
+        TModel Get<TModel>(Guid id) where TModel : class;
 
         /// <summary>
         /// Returns an <see cref="IQuery{TModel}"/> that can be filtered, sorted, paged,

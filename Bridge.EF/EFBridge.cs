@@ -34,6 +34,7 @@ namespace Bridge.EF
         }
 
         public TModel Get<TModel>(Guid id)
+            where TModel : class
         {
             var record = Db.Records.AsNoTracking().SingleOrDefault(o => o.Id == id);
             return (TModel)record.GetModel();

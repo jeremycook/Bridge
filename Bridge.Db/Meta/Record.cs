@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Bridge.EF.Internals
+namespace Bridge.Db.Meta
 {
-    internal class Record
+    public class Record
     {
         [Obsolete("Runtime only", true)]
         public Record() { }
@@ -16,7 +15,7 @@ namespace Bridge.EF.Internals
             if (model == null)
                 throw new ArgumentNullException("model");
 
-            FieldIndices = new List<FieldIndex>();
+            FieldIndexes = new List<FieldIndex>();
 
             Id = (model is IIdentify) ? (model as IIdentify).Id : Guid.NewGuid();
             ClassName = model.GetType().FullName;
@@ -30,12 +29,12 @@ namespace Bridge.EF.Internals
         public Guid Id { get; protected set; }
 
         // TODO? [Index("IX_dbo_Records_ClassName")]
-        [Required, StringLength(250)]
+        //[Required, StringLength(250)]
         public string ClassName { get; protected set; }
-        public virtual Class Class { get; private set; }
+        //public virtual Class Class { get; private set; }
 
-        [Index("IX_dbo_Records_Name")]
-        [Required, StringLength(250)]
+        //[Index("IX_dbo_Records_Name")]
+        //[Required, StringLength(250)]
         public string Name
         {
             get { return _Name; }
@@ -47,10 +46,10 @@ namespace Bridge.EF.Internals
             }
         }
 
-        [Required, MaxLength(16000)]
+        //[Required, MaxLength(16000)]
         public byte[] Storage { get; protected set; }
 
-        public virtual ICollection<FieldIndex> FieldIndices { get; protected set; }
+        public virtual ICollection<FieldIndex> FieldIndexes { get; set; }
 
 
         /// <summary>
@@ -88,36 +87,10 @@ namespace Bridge.EF.Internals
             Storage = System.Text.Encoding.UTF8.GetBytes(json);
 
             // Update field indexes.
-            var storedIndexes = FieldIndices.ToList();
-            var props = GetModelType().GetProperties().ToList();
-
-            var removedIndexes = storedIndexes
-                .Where(o => !props.Any(p => p.Name.Equals(o.Name, StringComparison.InvariantCultureIgnoreCase)))
-                .ToList();
-            foreach (var item in removedIndexes)
+            FieldIndexes.Clear();
+            foreach (var prop in GetModelType().GetProperties())
             {
-                FieldIndices.Remove(item);
-            }
-
-            var existingProps = props
-                .Select(o => new
-                {
-                    Property = o,
-                    Index = storedIndexes.SingleOrDefault(i => i.Name.Equals(o.Name, StringComparison.InvariantCultureIgnoreCase))
-                })
-                .Where(o => o.Index != null)
-                .ToList();
-            foreach (var item in existingProps)
-            {
-                item.Index.UpdateValue(item.Property.GetValue(model));
-            }
-
-            var missingProps = props
-                .Where(o => !storedIndexes.Any(i => i.Name.Equals(o.Name, StringComparison.InvariantCultureIgnoreCase)))
-                .ToList();
-            foreach (var prop in missingProps)
-            {
-                FieldIndices.Add(new FieldIndex(Id, prop.Name, prop.GetValue(model)));
+                FieldIndexes.Add(new FieldIndex(Id, prop.Name, prop.GetValue(model)));
             }
         }
 
@@ -125,7 +98,7 @@ namespace Bridge.EF.Internals
         {
             if (_ModelType == null)
             {
-                foreach (var assembly in EFBridge.ModelAssemblies)
+                foreach (var assembly in DbBridge.ModelAssemblies)
                 {
                     Type type = assembly.GetType(ClassName);
                     if (type != null)
