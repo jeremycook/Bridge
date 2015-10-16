@@ -1,10 +1,10 @@
-﻿# Bridge
+﻿# DataBridge
 
 NoSQL design ♥ SQL database
 
 I've made this project to scratch an itch. I want to use a NoSQL store like Mongo,
 Raven or whatever, but don't have access to one. What I do have
-access to is SQL Server. Thus was born Bridge, a persistance layer that allows
+access to is SQL Server. Thus was born DataBridge, a persistance layer that allows
 me to forget about the **RM** in ORMs, and just get on with the **O**s.
 
 Use it today to build a bridge between your SQL database and your NoSQL project 
@@ -160,16 +160,16 @@ ALTER TABLE [dbo].[Records] CHECK CONSTRAINT [FK_dbo.Records_dbo.Classes_ClassNa
 
 * Great `IDbConnection` support: Support *any* or at least the most common
   implementations of `IDbConnection`. SQLite seems like a great starting point.
-* `Bridge.Mongo` support: I can imagine starting a project with Bridge over SQL and
-  later wanting to use Bridge over Mongo in order to benefit from MapReduce and other
+* `DataBridge.Mongo` support: I can imagine starting a project with DataBridge over SQL and
+  later wanting to use DataBridge over Mongo in order to benefit from MapReduce and other
   features.
 
-> The projects I am using Bridge on currently target SQL Server, and that means certain
-aspects of Bridge may only work with a SQL Server database. But, I desire to eventually
+> The projects I am using DataBridge on currently target SQL Server, and that means certain
+aspects of DataBridge may only work with a SQL Server database. But, I desire to eventually
 support any database that [Dapper](https://github.com/StackExchange/dapper-dot-net) supports
 because Dapper is what I'm using to interact with the database under the hood. If 
-you find Bridge useful and need, would like, or have implemented support for another 
-database [please let me know](https://github.com/jeremycook/Bridge/issues).
+you find DataBridge useful and need, would like, or have implemented support for another 
+database [please let me know](https://github.com/jeremycook/DataBridge/issues).
 
 ## License
 
