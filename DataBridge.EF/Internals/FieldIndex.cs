@@ -14,7 +14,7 @@ namespace DataBridge.EF.Internals
         public FieldIndex(Guid recordId, string name, object value)
         {
             if (name == null)
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException("name");
 
             RecordId = recordId;
             Name = name;
@@ -57,7 +57,7 @@ namespace DataBridge.EF.Internals
             }
             else
             {
-                throw new ArgumentException(nameof(value),
+                throw new ArgumentException("value",
                     string.Format("The argument of type '{0}' is not supported and must be of type String, DateTimeOffset, Int32, Decimal, or Float.", value.GetType()));
             }
         }

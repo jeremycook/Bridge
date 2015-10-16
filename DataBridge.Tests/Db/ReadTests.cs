@@ -62,8 +62,8 @@ namespace DataBridge.Tests.Db
             string contentFullName = typeof(IContent).FullName;
             var receivedPosts = Bridge.Query<Post>()
                 .Filter(new And(
-                    leftFilter: new Eq(new Field(nameof(Post.Title)), new Literal(posts.First().Title)),
-                    rightFilter: new Eq(new Field(nameof(Post.Author)), new Literal(posts.First().Author))
+                    leftFilter: new Eq(new Field("Title"), new Literal(posts.First().Title)),
+                    rightFilter: new Eq(new Field("Author"), new Literal(posts.First().Author))
                 ))
                 .ToList();
 

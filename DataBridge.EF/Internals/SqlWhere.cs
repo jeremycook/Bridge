@@ -8,10 +8,11 @@ namespace DataBridge.EF.Internals
         public SqlWhere(StandardFilter filter)
         {
             Clause = Apply("{0}", filter);
+            Parameters = new List<Literal>();
         }
 
         public string Clause { get; protected set; }
-        public List<Literal> Parameters { get; protected set; } = new List<Literal>();
+        public List<Literal> Parameters { get; protected set; }
 
         internal string Apply(string format, params StandardFilter[] filters)
         {

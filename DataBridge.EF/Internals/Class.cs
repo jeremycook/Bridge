@@ -30,12 +30,12 @@ namespace DataBridge.EF.Internals
         {
             if (!@class.IsClass)
             {
-                throw new ArgumentException(nameof(@class), "The argument must be a class.");
+                throw new ArgumentException("@class", "The argument must be a class.");
             }
 
             if (@class.FullName != Name)
             {
-                throw new ArgumentException(nameof(@class), "The argument's `FullName` must match class's `Name`.");
+                throw new ArgumentException("@class", "The argument's `FullName` must match class's `Name`.");
             }
 
             var storedInterfaces = Interfaces.ToList();

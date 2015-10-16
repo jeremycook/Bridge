@@ -14,7 +14,7 @@ namespace DataBridge.EF.Internals
         public Interface(string name)
         {
             if (name == null)
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException("name");
 
             Name = name;
         }

@@ -75,7 +75,7 @@ namespace DataBridge.EF.Internals
         public void SetModel(object model)
         {
             if (model == null)
-                throw new ArgumentNullException(nameof(model));
+                throw new ArgumentNullException("model");
 
             if (model.GetType().FullName != this.ClassName)
                 throw new InvalidOperationException(string.Format(
