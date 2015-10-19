@@ -33,11 +33,10 @@ namespace DataBridge.EF
             Db = new BridgeDbContext(nameOrConnectionString);
         }
 
-        public TModel Get<TModel>(Guid id)
-            where TModel : class
+        public object Get(Guid id)
         {
             var record = Db.Records.AsNoTracking().SingleOrDefault(o => o.Id == id);
-            return (TModel)record.GetModel();
+            return record.GetModel();
         }
 
         public IQuery<TModel> Query<TModel>()

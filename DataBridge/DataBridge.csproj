@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Field.cs" />
     <Compile Include="IBridge.cs" />
+    <Compile Include="IBridgeExtensions.cs" />
     <Compile Include="Literal.cs" />
     <Compile Include="StandardFilter.cs" />
     <Compile Include="IIdentify.cs" />

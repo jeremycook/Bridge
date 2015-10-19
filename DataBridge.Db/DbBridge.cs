@@ -38,11 +38,10 @@ namespace DataBridge.Db
             }
         }
 
-        public TModel Get<TModel>(Guid id)
-            where TModel : class
+        public object Get(Guid id)
         {
             Record record = Db.Query<Record>("select * from dbo.Records where Id = @id", new { id }).SingleOrDefault();
-            return (TModel)record.GetModel();
+            return record.GetModel();
         }
 
         public IQuery<TModel> Query<TModel>()

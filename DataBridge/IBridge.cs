@@ -8,10 +8,9 @@ namespace DataBridge
         /// <summary>
         /// Returns the matching model or null.
         /// </summary>
-        /// <typeparam name="TModel"></typeparam>
         /// <param name="id"></param>
         /// <returns></returns>
-        TModel Get<TModel>(Guid id) where TModel : class;
+        object Get(Guid id);
 
         /// <summary>
         /// Returns an <see cref="IQuery{TModel}"/> that can be filtered, sorted, paged,
