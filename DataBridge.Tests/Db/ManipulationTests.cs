@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using DataBridge.Tests.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
 namespace DataBridge.Tests.Db
@@ -31,6 +32,26 @@ namespace DataBridge.Tests.Db
             post.Title = "Changed title!";
 
             Bridge.Update(post.Id, post);
+
+            post = Bridge.Get(post.Id) as Post;
+            Assert.AreEqual("Changed title!", post.Title);
+        }
+
+        [TestMethod]
+        public void UpdatePostUpdatesIndexes()
+        {
+            var post = PostHydrador.GetSingle();
+            Bridge.Insert(post);
+
+            post.Title = "Changed title!";
+
+            Bridge.Update(post.Id, post);
+
+            var match = Bridge.Query<Post>()
+                .Filter(new Eq(new Field("Title"), new Literal("Changed title!")))
+                .Count();
+
+            Assert.AreEqual(1, match);
         }
 
         [TestMethod]

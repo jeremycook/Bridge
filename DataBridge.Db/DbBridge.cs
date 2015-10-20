@@ -1,6 +1,6 @@
-﻿using DataBridge.Db.Internal;
+﻿using Dapper;
+using DataBridge.Db.Internal;
 using DataBridge.Db.Meta;
-using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -80,22 +80,34 @@ namespace DataBridge.Db
 
         public void Update(Guid id, object model)
         {
-            //Type classType = model.GetType();
-            // TODO? UpsertClass(classType);
-
-            Record record = Db.Query<Record>("select * from dbo.Records where Id = @Id", new { Id = id }).Single();
-            record.FieldIndexes = Db.Query<FieldIndex>("select * from dbo.FieldIndexes where RecordId = @RecordId", new { RecordId = id }).ToList();
-
-            if (record.ClassName != model.GetType().FullName)
+            using (var tx = Db.BeginTransaction())
             {
-                throw new InvalidOperationException(string.Format("The type of `model` changed from '{0}' to '{1}'.",
-                    record.ClassName, model.GetType().FullName));
+                //Type classType = model.GetType();
+                // TODO? UpsertClass(classType);
+
+                Record record = Db.Query<Record>("select * from dbo.Records where Id = @Id", new { Id = id }, tx).Single();
+                record.FieldIndexes = Db.Query<FieldIndex>("select * from dbo.FieldIndexes where RecordId = @RecordId", new { RecordId = id }, tx).ToList();
+
+                if (record.ClassName != model.GetType().FullName)
+                {
+                    throw new InvalidOperationException(string.Format("The type of `model` changed from '{0}' to '{1}'.",
+                        record.ClassName, model.GetType().FullName));
+                }
+
+                record.SetModel(model);
+
+                Db.Execute("update dbo.Records set Name = @name, Storage = @storage from dbo.Records where Id = @id",
+                    new { record.Id, record.Name, record.Storage }, tx);
+
+                // Update field indexes.
+                Db.Execute("delete from dbo.FieldIndexes where RecordId = @RecordId", new { RecordId = record.Id }, tx);
+                Db.Execute("insert into dbo.FieldIndexes (RecordId, Name, Guid, Text, Moment, Number, Float) values (@RecordId, @Name, @Guid, @Text, @Moment, @Number, @Float)",
+                    record.FieldIndexes.Select(fi => new { fi.RecordId, fi.Name, fi.Guid, fi.Text, fi.Moment, fi.Number, fi.Float }),
+                    tx
+                );
+
+                tx.Commit();
             }
-
-            record.SetModel(model);
-
-            Db.Execute("update dbo.Records set Name = @name, Storage = @storage from dbo.Records where Id = @id",
-                new { record.Id, record.Name, record.Storage });
         }
 
         public void Delete(Guid id)
